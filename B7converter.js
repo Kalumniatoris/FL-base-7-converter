@@ -17,7 +17,7 @@
 
     //To alow changing tabs.
     if (window.onurlchange === null) {
-    window.addEventListener('urlchange',(x)=>{rep(),console.log(x)});
+    window.addEventListener('urlchange',(x)=>{rep();console.log(x)});
     }
 
 
