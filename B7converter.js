@@ -17,7 +17,7 @@
 
     //To alow changing tabs.
     if (window.onurlchange === null) {
-    window.addEventListener('urlchange',(x)=>{rep();console.log(x)});
+    window.addEventListener('urlchange',(x)=>{setTimeout(rep,0);console.log(x)});
     }
 
 
@@ -60,7 +60,7 @@ function check(changes, observer) {
 
 
 function replace(target){
-    replaceInText(document.querySelector(target),/\d+/g,(x)=>{return x>=7?`(${c3(x,7)})`:x})
+    replaceInText(document.querySelector(target),/\d+/g,(x)=>{return x>7?`(${c3(x,7)})`:x==7?`YY7YY`:x})
    replaceInText(document.querySelector(target),/YY[7]YY/,(x)=>{return `7`},"font-size:120%;font-weight:bold")
 }
 
