@@ -17,7 +17,7 @@
 
     //To alow changing tabs.
     if (window.onurlchange === null) {
-    window.addEventListener('urlchange', () =>rep());
+    window.addEventListener('urlchange',(x)=>{rep(),console.log(x)});
     }
 
 
@@ -31,6 +31,7 @@ function rep(){
 
 
     console.log('begone');
+
 }
 })();
 
@@ -38,7 +39,9 @@ function rep(){
 function checkBazaar(changes, observer) {
 
     //workaround for bazaar (not that it actually works correctly) it doesn't allow changing shops
-    if(document.querySelector('.shop__item')) {
+
+    //.shop-item to break it even more
+    if(document.querySelector('.shop')) {
      observer.disconnect();
      setTimeout(()=>{ replace('.shop');},100);
     }
