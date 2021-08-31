@@ -1,7 +1,7 @@
 # FL-base-7-converter
 Converts numbers in FL into base (7). Do not confuse with base 7
 
-1000=777+2*77+9*7+6
+1000=777+2\*77+9\*7+6
 
 It also marks out 7s (Which doesn't actually always works correctly for now)
 
