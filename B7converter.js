@@ -17,38 +17,48 @@
 
     //To alow changing tabs.
     if (window.onurlchange === null) {
-    window.addEventListener('urlchange', () =>replace());
+    window.addEventListener('urlchange', () =>rep());
     }
 
 
+setTimeout(rep,0);
+function rep(){
 
-
+    console.log('begin');
 //run-at document-idle (or -end) was too slow. Timeout too ureliable.
 (new MutationObserver(check)).observe(document, {childList: true, subtree: true});
-function check(changes, observer) {
+    (new MutationObserver(checkBazaar)).observe(document, {childList: true, subtree: true});
 
-    //seems to be loading after main content
-    if(document.querySelector('.footer-content')) {
-      observer.disconnect();
-      replace();
+
+    console.log('begone');
+}
+})();
+
+
+function checkBazaar(changes, observer) {
+
+    //workaround for bazaar (not that it actually works correctly) it doesn't allow changing shops
+    if(document.querySelector('.shop__item')) {
+     observer.disconnect();
+     setTimeout(()=>{ replace('.shop');},100);
     }
 }
 
 
-})();
+function check(changes, observer) {
+
+    //seems to be loading after main content
+    if(document.querySelector('.footer-content')) {
+     observer.disconnect();
+     setTimeout(()=>{ replace('#root');},0);
+    }
+}
 
 
-function replace(){
-console.log("replacing");
-replaceInText(document.getElementById('root'),/\d+/g,(x)=>{return x>7?`(${c3(x,7)})`:x})
 
-
-    //VVV Looks as expected but breaks page (no link would work even at document.body.innerHTML=document.body.innerHTML)
- //   document.body.innerHTML=document.body.innerHTML.replaceAll('QWE','<span style=" font-size:smaller">(');
- //    document.body.innerHTML=document.body.innerHTML.replaceAll('EWQ',')</span>');
-
-//    document.body.innerHTML=document.body.innerHTML.replaceAll('QLQ','<span style="font-size:larger">');
-//   document.body.innerHTML=document.body.innerHTML.replaceAll('QRQ','</span>');
+function replace(target){
+    replaceInText(document.querySelector(target),/\d+/g,(x)=>{return x>=7?`(${c3(x,7)})`:x})
+   replaceInText(document.querySelector(target),/YY[7]YY/,(x)=>{return `7`},"font-size:120%;font-weight:bold")
 }
 
 
@@ -56,19 +66,23 @@ replaceInText(document.getElementById('root'),/\d+/g,(x)=>{return x>7?`(${c3(x,7
 function c3(x,b=7){
 
    let base=cbase(x,b);
-
-
-
     let val=x-x%base;
 
     if(x<b){return x}
-    if(x==base){return `${x}`}
+    if(x==b){return `YY${x}YY`}
     let mult=val/base>1?`${val/base}*`:``;
 
     let rest=c3(x%base,b);
     let restStr=rest==0?'':`+${rest}`;
-    return `${mult}${base}${restStr}`
 
+   let baseStr='';
+    while(base>1){
+     baseStr+=`YY${b}YY`
+        base/=10;
+    }
+
+  //  return `${mult}<span style:"font-size:180%;">${base}<span>${restStr}`
+return `${mult}${baseStr}${restStr}`
 }
 
 
@@ -94,20 +108,38 @@ return base;
 
 
 
-//I am not happy with using it, I would prefer regex that match it correctly but trying to get it to ignore tags was too annoying.
-//Not to say that .replaceAll doesn't exactly works correctly here due to how page is loaded or something
-//https://stackoverflow.com/a/50537862
-function replaceInText(element, pattern, replacement) {
+
+//https://stackoverflow.com/a/50537862  ; slightly modified to allow adding tags NOT
+//https://stackoverflow.com/a/7698745
+
+//Actually, do not look inside;
+
+//I probably should split it into two functions, as now
+function replaceInText(element, pattern, replacement, addStyle=false,target=7) {
+    if(element==null)return;
     for (let node of element.childNodes) {
         switch (node.nodeType) {
             case Node.ELEMENT_NODE:
-                replaceInText(node, pattern, replacement);
+                replaceInText(node, pattern, replacement,addStyle);
                 break;
             case Node.TEXT_NODE:
-                node.textContent = node.textContent.replace(pattern, replacement);
+
+                if(!addStyle){
+                let u = node.nodeValue;
+                node.replaceWith(u.replace(pattern,replacement));
+                }
+                else{
+
+                //    console.log("\n\n\n",node.parentNode.innerHTML,"\n\n",node.parentNode.nodeValue,"\n\n\n\n");
+
+                    let reg=new RegExp(`YY${target}YY`,'g')
+                  node.parentNode.innerHTML=node.parentNode.innerHTML.replaceAll(reg, (x)=>{return `<span style="${addStyle}">${target}</span>`});//(x)=>{return `<span style="color:red">7<span>`});
+
+
+                }
                 break;
             case Node.DOCUMENT_NODE:
-                replaceInText(node, pattern, replacement);
+                replaceInText(node, pattern, replacement,addStyle);
         }
     }
 }
