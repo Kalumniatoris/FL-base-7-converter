@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FL base (7)+
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2.12
 // @description  More 'useful' number system
 // @author       Kalumniatoris
 // @match        https://www.fallenlondon.com/*
@@ -24,13 +24,10 @@
 setTimeout(rep,0);
 function rep(){
 
-    console.log('begin');
 //run-at document-idle (or -end) was too slow. Timeout too ureliable.
 (new MutationObserver(check)).observe(document, {childList: true, subtree: true});
     (new MutationObserver(checkBazaar)).observe(document, {childList: true, subtree: true});
 
-
-    console.log('begone');
 
 }
 })();
@@ -60,8 +57,10 @@ function check(changes, observer) {
 
 
 function replace(target){
-    replaceInText(document.querySelector(target),/\d+/g,(x)=>{return x>7?`(${c3(x,7)})`:x==7?`YY7YY`:x})
-   replaceInText(document.querySelector(target),/YY[7]YY/,(x)=>{return `7`},"font-size:120%;font-weight:bold")
+    replaceInText(document.querySelector(target),/\d+/g,(x)=>{return x>7?`(${c3(x,7)})`:x==7?`7`:x})
+   //   replaceInText(document.querySelector(target),/\d+/g,(x)=>{return x>7?`(${c3(x,7)})`:x==7?`YY7YY`:x})
+
+  // replaceInText(document.querySelector(target),/YY[7]YY/,(x)=>{return `7`},"font-size:120%;font-weight:bold")
 }
 
 
@@ -72,7 +71,9 @@ function c3(x,b=7){
     let val=x-x%base;
 
     if(x<b){return x}
-    if(x==b){return `YY${x}YY`}
+    if(x==b){return `${x}`}
+  //  if(x==b ){return `YY${x}YY`}
+
     let mult=val/base>1?`${val/base}*`:``;
 
     let rest=c3(x%base,b);
@@ -80,7 +81,8 @@ function c3(x,b=7){
 
    let baseStr='';
     while(base>1){
-     baseStr+=`YY${b}YY`
+  //   baseStr+=`YY${b}YY`
+        baseStr+=`${b}`
         base/=10;
     }
 
@@ -117,8 +119,29 @@ return base;
 
 //Actually, do not look inside;
 
-//I probably should split it into two functions, as now
-function replaceInText(element, pattern, replacement, addStyle=false,target=7) {
+//
+function replaceInText(element, pattern, replacement) {
+    if(element==null)return;
+    for (let node of element.childNodes) {
+        switch (node.nodeType) {
+            case Node.ELEMENT_NODE:
+                replaceInText(node, pattern, replacement);
+                break;
+            case Node.TEXT_NODE:
+                {
+                let u = node.nodeValue;
+                node.replaceWith(u.replace(pattern,replacement));
+                }
+
+                break;
+            case Node.DOCUMENT_NODE:
+                replaceInText(node, pattern, replacement);
+        }
+    }
+}
+
+
+/*function replaceInText(element, pattern, replacement, addStyle=false,target=7) {
     if(element==null)return;
     for (let node of element.childNodes) {
         switch (node.nodeType) {
@@ -145,4 +168,4 @@ function replaceInText(element, pattern, replacement, addStyle=false,target=7) {
                 replaceInText(node, pattern, replacement,addStyle);
         }
     }
-}
+}*/
